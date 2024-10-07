@@ -1,0 +1,27 @@
+runtime: java21
+#env: flex
+entrypoint: java -jar Auth2-0.0.1-SNAPSHOT-exec.jar  # Ensure the JAR name matches the one you're deploying
+
+instance_class: F4_1G  # You can adjust this based on your resource needs. F2 has more resources than F1.
+
+#automatic_scaling:
+##  target_cpu_utilization: 0.65
+#  min_num_instances: 1  # Minimum number of instances to keep alive
+#  max_num_instances: 5  # Adjust as per traffic needs
+
+# Health checks configuration
+readiness_check:
+  path: "/myapp-oAuth/actuator/health"  # Default Spring Boot actuator health check endpoint
+  check_interval_sec: 10  # Time between each health check
+  timeout_sec: 600  # How long to wait for a health check response before timing out
+  failure_threshold: 10  # Number of consecutive failed checks before considering the app unhealthy
+  success_threshold: 1  # Number of consecutive successful checks to mark the app healthy
+#  initial_delay_sec: 480
+
+liveness_check:
+  path: "/myapp-oAuth/actuator/health"  # Same endpoint for liveness check
+  check_interval_sec: 10  # Frequency of the check
+  timeout_sec: 600  # Timeout for the liveness check response
+  failure_threshold: 10  # Number of consecutive failed checks before restarting the app
+  success_threshold: 1  # Number of consecutive successful checks to mark the app live
+#  initial_delay_sec: 480
