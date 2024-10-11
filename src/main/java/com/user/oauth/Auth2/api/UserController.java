@@ -42,9 +42,6 @@ public class UserController {
     }
 
     @GetMapping("/get-user-details/{userName}")
-    @Operation(
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
     public UserDto getUserDetails(@PathVariable("userName") String userName) {
         return userService.getUserDetails(userName);
     }

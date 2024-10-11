@@ -38,7 +38,6 @@ public class Auth2Controller {
         } catch (AuthenticationException e) {
             throw new RuntimeException("INVALID_CREDENTIALS", e);
         }
-        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
-        return auth2Service.generateToken(userDetails);
+        return auth2Service.generateToken(request.getUsername(), request.getPassword());
     }
 }

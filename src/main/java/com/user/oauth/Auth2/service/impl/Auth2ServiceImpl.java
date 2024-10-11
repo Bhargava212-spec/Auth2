@@ -12,7 +12,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
@@ -35,31 +34,27 @@ public class Auth2ServiceImpl implements Auth2Service {
     @Value("${spring.security.oauth2.client.registration.azure.token-uri}")
     private String tokenUri;
 
-    @Value("${spring.security.oauth2.client.registration.azure.scope}")
-    private String scope;
-
     @Value("${spring.security.oauth2.client.registration.azure.authorization-grant-type}")
     private String grant;
 
 
     @Override
-    @Transactional
     @CircuitBreaker(name = "tokenCircuitBreaker", fallbackMethod = "fallbackForToken")
-    public String generateToken(UserDetails userDetails) {
-        logger.info("START : Fetching the token for the user : {}", userDetails.getUsername());
+    public String generateToken(String userName , String pwd) {
+        logger.info("START : Fetching the token for the user : {}", userName);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", grant);
         body.add("client_id", clientId);
         body.add("client_secret", clientSecret);
-        body.add("username", userDetails.getUsername());
-        body.add("password", userDetails.getPassword());
+        body.add("username", userName);
+        body.add("password", pwd);
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
         try {
             return restTemplate.exchange(tokenUri, HttpMethod.POST, request, String.class).getBody();
         } catch (RestClientException e) {
-            logger.error("Error while Fetching the token for the user : {} with message : {}", userDetails.getUsername(), e.getMessage());
+            logger.error("Error while Fetching the token for the user : {} with message : {}", userName, e.getMessage());
             throw new RuntimeException(e);
         }
     }

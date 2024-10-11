@@ -36,45 +36,45 @@ public class UserServiceImpl implements UserService {
     @Override
     public String createUser(UserRequest userDto) {
 
-        if (Objects.nonNull(userDto)) {
-
-            if (Objects.isNull(userDto.getUserName()) || userDto.getUserName().isEmpty()) {
-                throw new IncompleteDataException("User name cannot be empty or null");
-            }
-
-            if (Objects.isNull(userDto.getPassword()) || userDto.getPassword().isEmpty()) {
-                throw new IncompleteDataException("password cannot be empty or null");
-            }
-
-            if (Objects.isNull(userDto.getEmail()) || userDto.getEmail().isEmpty()) {
-                throw new IncompleteDataException("email cannot be empty or null");
-            }
-
-            User user = userRepository.findByEmail(userDto.getEmail());
-
-            if (Objects.nonNull(user)) {
-                throw new RuntimeException("user already exists with Email " + userDto.getEmail());
-            }
-
-            user = userRepository.findByUsername(userDto.getUserName());
-            if (Objects.nonNull(user)) {
-                throw new RuntimeException("user already exists with userName " + userDto.getEmail() + "choose different userName");
-            }
-            user = new User();
-            user.setUsername(userDto.getUserName());
-            user.setEmail(userDto.getEmail());
-            user.setEnabled(true);
-            user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-            user.setRoles("USER");
-            user.setUpdatedBy("USER");
-            user.setCreatedDate(new Date());
-            user.setUpdatedDate(new Date());
-            userRepository.save(user);
-//            kafkaProducerService.publishEvent("user-events", generatePayLoad(user, EventType.CREATE));
-            logger.info("User created successfully with userid : {}", userDto.getUserName());
-            return "User created successfully with userid " + userDto.getUserName();
+        if(Objects.isNull(userDto)){
+            throw new RuntimeException("request is null");
         }
-        throw new IncompleteDataException("User details are null");
+
+        if (Objects.isNull(userDto.getUserName()) || userDto.getUserName().isEmpty()) {
+            throw new IncompleteDataException("User name cannot be empty or null");
+        }
+
+        if (Objects.isNull(userDto.getPassword()) || userDto.getPassword().isEmpty()) {
+            throw new IncompleteDataException("password cannot be empty or null");
+        }
+
+        if (Objects.isNull(userDto.getEmail()) || userDto.getEmail().isEmpty()) {
+            throw new IncompleteDataException("email cannot be empty or null");
+        }
+
+        User user = userRepository.findByEmail(userDto.getEmail());
+
+        if (Objects.nonNull(user)) {
+            throw new RuntimeException("user already exists with Email " + userDto.getEmail());
+        }
+
+        user = userRepository.findByUsername(userDto.getUserName());
+        if (Objects.nonNull(user)) {
+            throw new RuntimeException("user already exists with userName " + userDto.getEmail() + "choose different userName");
+        }
+        user = new User();
+        user.setUsername(userDto.getUserName());
+        user.setEmail(userDto.getEmail());
+        user.setEnabled(true);
+        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        user.setRoles("USER");
+        user.setUpdatedBy("USER");
+        user.setCreatedDate(new Date());
+        user.setUpdatedDate(new Date());
+        userRepository.save(user);
+//            kafkaProducerService.publishEvent("user-events", generatePayLoad(user, EventType.CREATE));
+        logger.info("User created successfully with userid : {}", userDto.getUserName());
+        return "User created successfully with userid " + userDto.getUserName();
     }
 
     private UserEvent generatePayLoad(User user, EventType eventType) {
@@ -131,10 +131,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String deleteUser(String userName) {
-        logger.info("deleting user details for the userName : {}", userName);
         if (Objects.nonNull(userName) && !userName.isEmpty()) {
+            logger.info("deleting user details for the userName : {}", userName);
             User user = userRepository.findByUsername(userName);
-
             if (Objects.isNull(user)) {
                 throw new EntityNotFoundException("user does not exist");
             }
